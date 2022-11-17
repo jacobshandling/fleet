@@ -2,6 +2,7 @@
   margin-top: $pad-medium;
   position: relative;
   width: 100%;
+  margin-bottom: $pad-small;
 
   &__icon {
     position: absolute;
@@ -61,20 +62,18 @@
     }
   }
 
+  &__label,
+  &__errors {
+    font-size: $small;
+    font-weight: $bold;
+    margin-bottom: $pad-small;
+  }
+
   &__label {
     display: block;
-    font-size: $x-small;
-    font-weight: $bold;
-    margin-bottom: $pad-xsmall;
-
-    &[data-has-tooltip="true"] {
-      margin-bottom: $pad-small;
-    }
   }
 
   &__errors {
-    font-size: $x-small;
-    font-weight: $bold;
     color: $core-vibrant-red;
   }
 
