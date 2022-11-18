@@ -11,12 +11,52 @@
 			"detail": "eslint frontend cypress --ext .js,.jsx,.ts,.tsx"
 		},
 		{
+			// see https://code.visualstudio.com/docs/terminal/basics#_automating-terminals-with-tasks
+			"label": "Start development infrastructure processes",
+			// Run associated tasks in-order
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"Make generate-dev", 
+				"Docker Compose Dependencies", 
+				"Fleet premium development server", 
+				"virtual hosts",
+				"osquery-perf host mocks"
+			],
+			// Mark as the default build task so cmd/ctrl+shift+b will create them
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			// Try to start the task on folder open
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
+		},
+		{
+			// The name that shows up in terminal tab
+			"label": "Make generate-dev",
+			// The task will launch a shell
 			"type": "shell",
-			"label": "Docker Compose Dependencies",
+			"command": "make generate-dev",
+			// Mark as a background task to avoid the spinner animation on the terminal tab
+			"isBackground": true,
+			// Create the tasks in a terminal group
+			"presentation": {
+				"group": "dev infra"
+			},
+			"runOptions": {
+				"instanceLimit": 1,
+				"runOn": "folderOpen"
+			},
+			// "problemMatcher": ["$tsc-watch"]
+		},
+		{
+			"label": "Docker dev infrastructure",
+			"type": "shell",
 			"command": "docker-compose up",
 			"isBackground": true,
 			"presentation": {
-				"panel": "dedicated"
+				"group": "dev infra"
 			},
 			"runOptions": {
 				"instanceLimit": 1,
@@ -25,17 +65,32 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Fleet premium development server",
 			"type": "shell",
-			"label": "Make generate-dev",
-			"command": "make generate-dev",
+			"command": "./build/fleet serve --dev --dev_license",
 			"isBackground": true,
 			"presentation": {
-				"panel": "dedicated"
+				"group": "dev infra"
 			},
 			"runOptions": {
 				"instanceLimit": 1,
 				"runOn": "folderOpen"
-			}
-		}
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "virtual hosts",
+			"type": "shell",
+			"command": "cd tools/osquery && source $FLEET_ENV_PATH && docker-compose up",
+			"isBackground": true,
+			"presentation": {
+				"group": "dev hosts"
+			},
+			"runOptions": {
+				"instanceLimit": 1,
+				"runOn": "folderOpen"
+			},
+			"problemMatcher": []
+		},
 	]
 }
