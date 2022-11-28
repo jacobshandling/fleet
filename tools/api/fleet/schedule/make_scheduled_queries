@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in {0..10}
+do
+  ./add_query_to_pack 1 1
+done

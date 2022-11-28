@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in {0..101}
+do
+  ./create "system_info_$i" "SELECT * FROM system_info;"
+done
