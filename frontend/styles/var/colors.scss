@@ -22,11 +22,11 @@ $ui-vibrant-blue-25: #d9d9fe;
 $ui-vibrant-blue-10: #f1f0ff;
 
 // Notifications & status & specific messages
-$ui-offline: #8b8fa2;
+$ui-offline: $ui-fleet-black-50;
 $ui-success: #3db67b;
 $ui-warning: #ebbc43;
 $ui-error: #d66c7b;
-$ui-info: #6a67fe;
+$ui-info: $core-vibrant-blue;
 $ui-expiry-message: #fef7e0;
 
 // Rainbow
@@ -40,7 +40,11 @@ $gradients-dark-gradient-vertical: linear-gradient(
   #201e43 0%,
   #353d62 100%
 );
-$gradients-bright-gradient: linear-gradient(180deg, #ae6ddf 0%, #6a67fe 100%);
+$gradients-bright-gradient: linear-gradient(
+  180deg,
+  $core-fleet-purple 0%,
+  $core-vibrant-blue 100%
+);
 
 // Colors for over (hover) and down (active) buttons styles
 $core-vibrant-red-over: #e93661;
