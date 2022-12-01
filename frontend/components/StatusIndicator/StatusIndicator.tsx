@@ -5,7 +5,7 @@ import ReactTooltip from "react-tooltip";
 interface IStatusIndicatorProps {
   value: string;
   tooltip?: {
-    id: number;
+    id: number | string;
     tooltipText: string;
   };
 }
