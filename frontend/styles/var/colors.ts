@@ -25,4 +25,5 @@ export const COLORS = {
   "status-success": "#3DB67B",
   "status-warning": "#F8CD6B",
   "status-error": "#ED6E85",
+  "status-offline": "#8B8FA2",
 };
