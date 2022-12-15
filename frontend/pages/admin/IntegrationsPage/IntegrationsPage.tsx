@@ -39,6 +39,12 @@ const IntegrationsPage = ({ params }: IIntegrationSettingsPageProps) => {
 
   return (
     <div className={`${baseClass}`}>
+      <RequestCSRModal
+        userEmail="test@email.com"
+        orgName="test co"
+        onSubmit={() => alert("submited")}
+        onCancel={() => alert("canceled")}
+      />
       <p className={`${baseClass}__page-description`}>
         {isMdmEnabled ? MDM_ENABLED_DESCRIPTION : MDM_DISABLED_DESCRIPTION}
       </p>
