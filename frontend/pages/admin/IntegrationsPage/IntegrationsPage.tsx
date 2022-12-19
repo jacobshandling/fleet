@@ -39,15 +39,7 @@ const IntegrationsPage = ({ params }: IIntegrationSettingsPageProps) => {
 
   return (
     <div className={`${baseClass}`}>
-      {/* TODO: Move this into MDM settings tab once that exists */}
-      {/* TODO: replace these test props with the real functions */}
-      <RequestCSRModal
-        onSubmit={(formData: IRequestCSRFormData, destination: string) => {
-          alert("submited");
-        }}
-        onCancel={() => alert("canceled")}
-        destination="testination"
-      />
+      <Mdm />
       <p className={`${baseClass}__page-description`}>
         {isMdmEnabled ? MDM_ENABLED_DESCRIPTION : MDM_DISABLED_DESCRIPTION}
       </p>
