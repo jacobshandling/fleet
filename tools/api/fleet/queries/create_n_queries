@@ -1,0 +1,7 @@
+#!/bin/bash
+# $1 = how many queries to generate, a number
+# $2 = which query to generate, a number
+source $FLEET_ENV_PATH
+for i in $(eval echo {1..$1}); do
+  ./create $RANDOM $2
+done
