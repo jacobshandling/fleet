@@ -8,7 +8,6 @@ import { NotificationContext } from "context/notification";
 import mdmAppleAPI from "services/entities/mdm_apple";
 import mdmAppleBmAPI from "services/entities/mdm_apple_bm";
 import { IMdmApple, IMdmAppleBm } from "interfaces/mdm";
-import { IRequestCSRFormData } from "interfaces/request_csr";
 
 import Button from "components/buttons/Button";
 import CustomLink from "components/CustomLink";
