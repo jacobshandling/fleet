@@ -101,6 +101,7 @@ const RequestCSRModal = ({
           fleetdm.com will send your CSR to the below email. Your APNs key and
           SCEP certificate and key will be downloaded in the browser.
         </p>
+<<<<<<< HEAD
         <form
           className={`${baseClass}__form`}
           onSubmit={onFormSubmit}
@@ -139,6 +140,9 @@ const RequestCSRModal = ({
             </Button>
           </div>
         </form>
+=======
+        <RequestCSRForm onCancel={onCancel} />
+>>>>>>> 574380058 (spinner on submit; move requestCSR import into Form)
       </>
     );
   };

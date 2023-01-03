@@ -11,7 +11,11 @@ import local from "utilities/local";
 const requestCSR = async (
   formData: IRequestCSRFormData,
   setRequestState: React.Dispatch<
+<<<<<<< HEAD
     SetStateAction<"loading" | "error" | "success" | "invalid" | undefined>
+=======
+    SetStateAction<"loading" | "error" | "success" | undefined>
+>>>>>>> 574380058 (spinner on submit; move requestCSR import into Form)
   >
 ) => {
   setRequestState("loading");
