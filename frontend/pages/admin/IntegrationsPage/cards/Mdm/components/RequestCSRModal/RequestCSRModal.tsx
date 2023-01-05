@@ -35,7 +35,7 @@ const RequestCSRModal = ({
 
   const [requestState, setRequestState] = useState<
     "loading" | "error" | "success" | "invalid" | undefined
-  >(undefined);
+  >("success");
   const [invalidMessage, setInvalidMessage] = useState<string>("");
 
   useEffect(() => {
