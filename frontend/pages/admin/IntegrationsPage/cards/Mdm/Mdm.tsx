@@ -285,12 +285,7 @@ const Mdm = (): JSX.Element => {
           setShowCSRFlag={setShowCSRFlag}
         />
       )}
-      {showEditTeamModal && (
-        <EditTeamModal
-          onCancel={toggleEditTeamModal}
-          onEdit={toggleEditTeamModal}
-        />
-      )}
+      {showEditTeamModal && <EditTeamModal onCancel={toggleEditTeamModal} />}
     </div>
   );
 };
