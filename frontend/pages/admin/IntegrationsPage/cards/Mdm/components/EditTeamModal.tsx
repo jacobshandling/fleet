@@ -10,54 +10,53 @@ import Button from "components/buttons/Button";
 // @ts-ignore
 import Dropdown from "components/forms/fields/Dropdown";
 
+import { ITeamSummary } from "interfaces/team";
+import { isPremiumTier } from "utilities/permissions/permissions";
+
 interface IEditTeamModal {
   onCancel: () => void;
+  currentDefaultTeamName: string | undefined;
 }
 
 const baseClass = "edit-team-modal";
 
-const EditTeamModal = ({ onCancel }: IEditTeamModal): JSX.Element => {
-  // TODO - get default team:
-  // "The default team is saved in the global app config property mdm.apple_bm_default_team."
-  // GET /api/v1/fleet/config
-
-  // const {
-  //   data: apple_bm_default_team,
-  //   isLoading: isLoadingAppleBmDefaultTeam,
-  //   error: errorAppleBmDefaultTeam,
-  // } = useQuery<
-  //   IAppleBMDefaultTeamResponse, // interface of the team response should go here - may already exist somewhere? if not, make it
-  //   Error,
-  //   { id: number; name: string; description: string }
-  // >(["apple_bm_default_team"], () => configAPI.loadAll(), {
-  //   select: (data) => data.apple_bm_default_team,
-  // });
-
-  // trying directly, without useQuery:
-  // let apple_bm_default_team: {id: number, name: string, description: string};
-  // const getCurrentTeam = async () => {
-  //   try {
-  //     ({ apple_bm_default_team }) = await configAPI.loadAll();
-  //   } catch (error) {
-  //     // do something?
-  //   }();
-
+const EditTeamModal = ({
+  onCancel,
+  currentDefaultTeamName, // assuming this is a team NAME - need to confirm with Rachel and whoever's doing the API about IMdmAppleBm.default_team
+}: IEditTeamModal): JSX.Element => {
+  // availableTeams: Array<ITeamSummary>
   const { availableTeams } = useContext(AppContext);
   console.log(availableTeams);
 
-  const createTeamDropdownOptions = () => {
-    return availableTeams?.map((teamObject) => {
-      return { value: teamObject.id, label: teamObject.name };
-    });
-  };
+  const teamNameOptions = availableTeams?.map((teamSummary) => {
+    return { value: teamSummary.name, label: teamSummary.name };
+  });
+  console.log(teamNameOptions);
 
-  const onChangeSelectTeam = () => {
-    // TODO
-  };
+  const [defaultTeamName, setDefaultTeamName] = useState<string | undefined>(
+    currentDefaultTeamName
+  );
+
   const onFormSubmit = (): void => {
-    // TODO: API call
+    // TODO: clarify which API to hit, how to hit it
     // PATCH /api/v1/fleet/config with { apple_bm_default_team: string }	in request body
-    alert("Team change submitted! Not really.");
+
+    // API call sketch:
+    // const {
+    //   isLoading: updatingDefaultTeam,
+    //   data: defaultTeamUpdateResponse,
+    //   error: defaultTeamUpdateError
+    // } = useQuery<IUpdateMDMAppleDefaultTeam, Error, IUpdateMDMAppleDefaultTeam>(
+    //   ["mdmDefaultTeam"],
+    //   () => mdmAppleBmAPI.update(default_team: defaultTeamName),
+    //   {
+    //     enabled: isPremiumTier,
+    //     staleTime: 5000,
+    //   }
+    // )
+
+    // placeholder:
+    alert(`Default team (not actually) changed to ${defaultTeamName}`);
     onCancel();
   };
 
@@ -66,11 +65,10 @@ const EditTeamModal = ({ onCancel }: IEditTeamModal): JSX.Element => {
       <form className={`${baseClass}__form`} onSubmit={onFormSubmit}>
         <div className="bottom-label">
           <Dropdown
-            searchable
-            placeholder="No team"
-            options={createTeamDropdownOptions()}
-            onChange={onChangeSelectTeam}
-            // value={currentTeam}
+            placeholder={defaultTeamName ?? "No team"}
+            options={teamNameOptions}
+            onChange={setDefaultTeamName}
+            value={defaultTeamName ?? ""}
             label="Team"
           />
           <p>
@@ -79,11 +77,7 @@ const EditTeamModal = ({ onCancel }: IEditTeamModal): JSX.Element => {
           </p>
         </div>
         <div className="modal-cta-wrap">
-          <Button
-            type="submit"
-            variant="brand"
-            // isLoading={requestState === "loading"}
-          >
+          <Button type="submit" variant="brand">
             Save
           </Button>
           <Button onClick={onCancel} variant="inverse">
