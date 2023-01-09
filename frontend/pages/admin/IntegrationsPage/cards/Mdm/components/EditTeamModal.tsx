@@ -2,16 +2,12 @@ import React, { useState, useContext } from "react";
 
 import { AppContext } from "context/app";
 import configAPI from "services/entities/config";
-import { useQuery } from "react-query";
 
 import Modal from "components/Modal";
 import Button from "components/buttons/Button";
 
 // @ts-ignore
 import Dropdown from "components/forms/fields/Dropdown";
-
-import { ITeamSummary } from "interfaces/team";
-import { isPremiumTier } from "utilities/permissions/permissions";
 
 interface IEditTeamModal {
   onCancel: () => void;
@@ -22,7 +18,7 @@ const baseClass = "edit-team-modal";
 
 const EditTeamModal = ({
   onCancel,
-  currentDefaultTeamName, // assuming this is a team NAME - need to confirm with Rachel and whoever's doing the API about IMdmAppleBm.default_team
+  currentDefaultTeamName,
 }: IEditTeamModal): JSX.Element => {
   // availableTeams: Array<ITeamSummary>
   const { availableTeams } = useContext(AppContext);
@@ -37,27 +33,18 @@ const EditTeamModal = ({
     currentDefaultTeamName
   );
 
-  const onFormSubmit = (): void => {
-    // TODO: clarify which API to hit, how to hit it
-    // PATCH /api/v1/fleet/config with { apple_bm_default_team: string }	in request body
-
-    // API call sketch:
-    // const {
-    //   isLoading: updatingDefaultTeam,
-    //   data: defaultTeamUpdateResponse,
-    //   error: defaultTeamUpdateError
-    // } = useQuery<IUpdateMDMAppleDefaultTeam, Error, IUpdateMDMAppleDefaultTeam>(
-    //   ["mdmDefaultTeam"],
-    //   () => mdmAppleBmAPI.update(default_team: defaultTeamName),
-    //   {
-    //     enabled: isPremiumTier,
-    //     staleTime: 5000,
-    //   }
-    // )
-
-    // placeholder:
-    alert(`Default team (not actually) changed to ${defaultTeamName}`);
-    onCancel();
+  const onFormSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    event.preventDefault();
+    try {
+      const response = await configAPI.update({
+        mdm: { apple_bm_default_team: defaultTeamName },
+      });
+      onCancel();
+    } catch {
+      onCancel();
+    }
   };
 
   return (
