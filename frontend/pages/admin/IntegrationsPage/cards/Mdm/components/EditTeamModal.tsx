@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, FormEvent } from "react";
 
 import { AppContext } from "context/app";
 import configAPI from "services/entities/config";
@@ -22,25 +22,27 @@ const EditTeamModal = ({
 }: IEditTeamModal): JSX.Element => {
   // availableTeams: Array<ITeamSummary>
   const { availableTeams } = useContext(AppContext);
-  console.log(availableTeams);
 
   const teamNameOptions = availableTeams?.map((teamSummary) => {
     return { value: teamSummary.name, label: teamSummary.name };
   });
-  console.log(teamNameOptions);
 
   const [defaultTeamName, setDefaultTeamName] = useState<string | undefined>(
     currentDefaultTeamName
   );
 
-  const onFormSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const [requestState, setRequestState] = useState<"loading" | undefined>(
+    undefined
+  );
+
+  const onFormSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
     try {
+      setRequestState("loading");
       const response = await configAPI.update({
         mdm: { apple_bm_default_team: defaultTeamName },
       });
+      setRequestState(undefined);
       onCancel();
     } catch {
       onCancel();
@@ -64,7 +66,11 @@ const EditTeamModal = ({
           </p>
         </div>
         <div className="modal-cta-wrap">
-          <Button type="submit" variant="brand">
+          <Button
+            type="submit"
+            variant="brand"
+            isLoading={requestState === "loading"}
+          >
             Save
           </Button>
           <Button onClick={onCancel} variant="inverse">
