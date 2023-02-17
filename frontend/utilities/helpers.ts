@@ -38,6 +38,7 @@ import { IUser } from "interfaces/user";
 import stringUtils from "utilities/strings";
 import sortUtils from "utilities/sort";
 import {
+  DEFAULT_EMPTY_CELL_VALUE,
   DEFAULT_GRAVATAR_LINK,
   DEFAULT_GRAVATAR_LINK_DARK,
   PLATFORM_LABEL_DISPLAY_TYPES,
@@ -825,7 +826,7 @@ export const normalizeEmptyValues = (
       if ((Number.isFinite(value) && value !== 0) || !isEmpty(value)) {
         Object.assign(result, { [key]: value });
       } else {
-        Object.assign(result, { [key]: "---" });
+        Object.assign(result, { [key]: DEFAULT_EMPTY_CELL_VALUE });
       }
       return result;
     },
