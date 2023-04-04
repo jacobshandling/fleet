@@ -24,6 +24,8 @@ const HeaderCell = ({
     sortArrowClass = "ascending";
   }
 
+  // move header tooltip to the left when it's in the last column
+  // to avoid an unwanted whitespace issue
   let lastColumnHeaderWithTooltipClass = "";
   if (
     typeof value !== "string" &&
