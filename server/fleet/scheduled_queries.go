@@ -127,3 +127,81 @@ type ScheduledQueryStats struct {
 	UserTime     int       `json:"user_time" db:"user_time"`
 	WallTime     int       `json:"wall_time" db:"wall_time"`
 }
+
+func ScheduledQueryFromQuery(query *Query) *ScheduledQuery {
+	var (
+		snapshot *bool
+		removed  *bool
+	)
+	if query.Logging == "" || query.Logging == "snapshot" {
+		snapshot = ptr.Bool(true)
+		removed = ptr.Bool(false)
+	} else if query.Logging == "differential" {
+		snapshot = ptr.Bool(false)
+		removed = ptr.Bool(true)
+	} else { // query.Logging == "differential_ignore_removals"
+		snapshot = ptr.Bool(false)
+		removed = ptr.Bool(false)
+	}
+	return &ScheduledQuery{
+		ID:              query.ID,
+		Name:            query.Name,
+		QueryID:         query.ID,
+		QueryName:       query.Name,
+		Query:           query.Query,
+		Description:     query.Description,
+		Interval:        query.Interval,
+		Snapshot:        snapshot,
+		Removed:         removed,
+		Platform:        &query.Platform,
+		Version:         &query.MinOsqueryVersion,
+		AggregatedStats: query.AggregatedStats,
+	}
+}
+
+func ScheduledQueryToQueryPayloadForNewQuery(originalQuery *Query, scheduledQuery *ScheduledQuery) QueryPayload {
+	var logging *string
+	if scheduledQuery.Snapshot != nil && scheduledQuery.Removed != nil {
+		if *scheduledQuery.Snapshot {
+			logging = ptr.String(LoggingSnapshot)
+		} else if *scheduledQuery.Removed {
+			logging = ptr.String(LoggingDifferential)
+		} else {
+			logging = ptr.String(LoggingDifferentialIgnoreRemovals)
+		}
+	}
+	return QueryPayload{
+		Name:               &originalQuery.Name,
+		Description:        &originalQuery.Description,
+		Query:              &originalQuery.Query,
+		ObserverCanRun:     &originalQuery.ObserverCanRun,
+		TeamID:             originalQuery.TeamID,
+		Interval:           &scheduledQuery.Interval,
+		Platform:           scheduledQuery.Platform,
+		MinOsqueryVersion:  scheduledQuery.Version,
+		AutomationsEnabled: ptr.Bool(true),
+		Logging:            logging,
+	}
+}
+
+// NOTE(lucas): payload.Snapshot and payload.Removed must both be set in order to
+// change the logging behavior of a scheduled query.
+// Document this API change.
+func ScheduledQueryPayloadToQueryPayloadForModifyQuery(payload ScheduledQueryPayload) QueryPayload {
+	var logging *string
+	if payload.Snapshot != nil && payload.Removed != nil {
+		if *payload.Snapshot {
+			logging = ptr.String(LoggingSnapshot)
+		} else if *payload.Removed {
+			logging = ptr.String(LoggingDifferential)
+		} else {
+			logging = ptr.String(LoggingDifferentialIgnoreRemovals)
+		}
+	}
+	return QueryPayload{
+		Interval:          payload.Interval,
+		Platform:          payload.Platform,
+		MinOsqueryVersion: payload.Version,
+		Logging:           logging,
+	}
+}

@@ -266,7 +266,7 @@ func testScheduledQueriesListInPack(t *testing.T, ds *Datastore) {
 
 func testScheduledQueriesNew(t *testing.T, ds *Datastore) {
 	u1 := test.NewUser(t, ds, "Admin", "admin@fleet.co", true)
-	q1 := test.NewQuery(t, ds, "foo", "select * from time;", u1.ID, true)
+	q1 := test.NewQuery(t, ds, nil, "foo", "select * from time;", u1.ID, true)
 	p1 := test.NewPack(t, ds, "baz")
 
 	query, err := ds.NewScheduledQuery(context.Background(), &fleet.ScheduledQuery{
@@ -282,7 +282,7 @@ func testScheduledQueriesNew(t *testing.T, ds *Datastore) {
 
 func testScheduledQueriesGet(t *testing.T, ds *Datastore) {
 	u1 := test.NewUser(t, ds, "Admin", "admin@fleet.co", true)
-	q1 := test.NewQuery(t, ds, "foo", "select * from time;", u1.ID, true)
+	q1 := test.NewQuery(t, ds, nil, "foo", "select * from time;", u1.ID, true)
 	p1 := test.NewPack(t, ds, "baz")
 	sq1 := test.NewScheduledQuery(t, ds, p1.ID, q1.ID, 60, false, false, "")
 
@@ -306,7 +306,7 @@ func testScheduledQueriesGet(t *testing.T, ds *Datastore) {
 
 func testScheduledQueriesDelete(t *testing.T, ds *Datastore) {
 	u1 := test.NewUser(t, ds, "Admin", "admin@fleet.co", true)
-	q1 := test.NewQuery(t, ds, "foo", "select * from time;", u1.ID, true)
+	q1 := test.NewQuery(t, ds, nil, "foo", "select * from time;", u1.ID, true)
 	p1 := test.NewPack(t, ds, "baz")
 	sq1 := test.NewScheduledQuery(t, ds, p1.ID, q1.ID, 60, false, false, "")
 
@@ -362,7 +362,7 @@ func testScheduledQueriesCascadingDelete(t *testing.T, ds *Datastore) {
 	require.Nil(t, err)
 	require.Len(t, gotQueries, 3)
 
-	err = ds.DeleteQuery(context.Background(), queries[1].Name)
+	err = ds.DeleteQuery(context.Background(), nil, queries[1].Name)
 	require.Nil(t, err)
 
 	gotQueries, err = ds.ListScheduledQueriesInPackWithStats(context.Background(), 1, fleet.ListOptions{})
@@ -492,10 +492,10 @@ func testScheduledQueriesAsyncBatchSaveStats(t *testing.T, ds *Datastore) {
 	p2 := test.NewPack(t, ds, "p2")
 	p3 := test.NewPack(t, ds, "p3")
 
-	q1 := test.NewQuery(t, ds, "q1", "select 1", user.ID, true)
-	q2 := test.NewQuery(t, ds, "q2", "select 2", user.ID, true)
-	q3 := test.NewQuery(t, ds, "q3", "select 3", user.ID, true)
-	q4 := test.NewQuery(t, ds, "q4", "select 4", user.ID, true)
+	q1 := test.NewQuery(t, ds, nil, "q1", "select 1", user.ID, true)
+	q2 := test.NewQuery(t, ds, nil, "q2", "select 2", user.ID, true)
+	q3 := test.NewQuery(t, ds, nil, "q3", "select 3", user.ID, true)
+	q4 := test.NewQuery(t, ds, nil, "q4", "select 4", user.ID, true)
 
 	sq1 := test.NewScheduledQuery(t, ds, p1.ID, q1.ID, 60, false, false, "sq1")
 	sq2 := test.NewScheduledQuery(t, ds, p2.ID, q2.ID, 60, false, false, "sq2")

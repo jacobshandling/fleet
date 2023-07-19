@@ -62,7 +62,7 @@ type NewQueryFunc func(ctx context.Context, query *fleet.Query, opts ...fleet.Op
 
 type SaveQueryFunc func(ctx context.Context, query *fleet.Query) error
 
-type DeleteQueryFunc func(ctx context.Context, name string) error
+type DeleteQueryFunc func(ctx context.Context, teamID *uint, name string) error
 
 type DeleteQueriesFunc func(ctx context.Context, ids []uint) (uint, error)
 
@@ -70,7 +70,7 @@ type QueryFunc func(ctx context.Context, id uint) (*fleet.Query, error)
 
 type ListQueriesFunc func(ctx context.Context, opt fleet.ListQueryOptions) ([]*fleet.Query, error)
 
-type QueryByNameFunc func(ctx context.Context, name string, opts ...fleet.OptionalArg) (*fleet.Query, error)
+type QueryByNameFunc func(ctx context.Context, teamID *uint, name string, opts ...fleet.OptionalArg) (*fleet.Query, error)
 
 type ObserverCanRunQueryFunc func(ctx context.Context, queryID uint) (bool, error)
 
@@ -1617,7 +1617,7 @@ type DataStore struct {
 	MDMWindowsInsertEnrolledDeviceFuncInvoked bool
 
 	MDMWindowsDeleteEnrolledDeviceFunc        MDMWindowsDeleteEnrolledDeviceFunc
-	MDMWindowsDeleteEnrolledDeviceFuncInvoked bool	
+	MDMWindowsDeleteEnrolledDeviceFuncInvoked bool
 
 	mu sync.Mutex
 }
@@ -1776,11 +1776,11 @@ func (s *DataStore) SaveQuery(ctx context.Context, query *fleet.Query) error {
 	return s.SaveQueryFunc(ctx, query)
 }
 
-func (s *DataStore) DeleteQuery(ctx context.Context, name string) error {
+func (s *DataStore) DeleteQuery(ctx context.Context, teamID *uint, name string) error {
 	s.mu.Lock()
 	s.DeleteQueryFuncInvoked = true
 	s.mu.Unlock()
-	return s.DeleteQueryFunc(ctx, name)
+	return s.DeleteQueryFunc(ctx, teamID, name)
 }
 
 func (s *DataStore) DeleteQueries(ctx context.Context, ids []uint) (uint, error) {
@@ -1804,11 +1804,11 @@ func (s *DataStore) ListQueries(ctx context.Context, opt fleet.ListQueryOptions)
 	return s.ListQueriesFunc(ctx, opt)
 }
 
-func (s *DataStore) QueryByName(ctx context.Context, name string, opts ...fleet.OptionalArg) (*fleet.Query, error) {
+func (s *DataStore) QueryByName(ctx context.Context, teamID *uint, name string, opts ...fleet.OptionalArg) (*fleet.Query, error) {
 	s.mu.Lock()
 	s.QueryByNameFuncInvoked = true
 	s.mu.Unlock()
-	return s.QueryByNameFunc(ctx, name, opts...)
+	return s.QueryByNameFunc(ctx, teamID, name, opts...)
 }
 
 func (s *DataStore) ObserverCanRunQuery(ctx context.Context, queryID uint) (bool, error) {
