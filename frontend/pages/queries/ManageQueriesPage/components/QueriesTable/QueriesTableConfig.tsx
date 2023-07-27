@@ -7,15 +7,12 @@ import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import PATHS from "router/paths";
 
 import permissionsUtils from "utilities/permissions";
+import { IQuery } from "interfaces/query";
 import { IUser } from "interfaces/user";
-import { secondsToDhms } from "utilities/helpers";
-import {
-  IEnhancedQuery,
-  ISchedulableQuery,
-} from "interfaces/schedulable_query";
-import { SupportedPlatform } from "interfaces/platform";
+import { addGravatarUrlToResource } from "utilities/helpers";
 
 import Icon from "components/Icon";
+import Avatar from "components/Avatar";
 import Checkbox from "components/forms/fields/Checkbox";
 import LinkCell from "components/TableContainer/DataTable/LinkCell/LinkCell";
 import HeaderCell from "components/TableContainer/DataTable/HeaderCell/HeaderCell";
@@ -23,12 +20,10 @@ import PlatformCell from "components/TableContainer/DataTable/PlatformCell";
 import TextCell from "components/TableContainer/DataTable/TextCell";
 import PillCell from "components/TableContainer/DataTable/PillCell";
 import TooltipWrapper from "components/TooltipWrapper";
-import { COLORS } from "styles/var/colors";
-import QueryAutomationsStatusIndicator from "../QueryAutomationsStatusIndicator";
 
 interface IQueryRow {
   id: string;
-  original: ISchedulableQuery;
+  original: IQuery;
 }
 
 interface IGetToggleAllRowsSelectedProps {
@@ -51,7 +46,7 @@ interface IHeaderProps {
 }
 interface IRowProps {
   row: {
-    original: IEnhancedQuery;
+    original: IQuery;
     getToggleRowSelectedProps: () => IGetToggleAllRowsSelectedProps;
     toggleRowSelected: () => void;
   };
@@ -60,26 +55,13 @@ interface IRowProps {
 
 interface ICellProps extends IRowProps {
   cell: {
-    value: string | number | boolean;
+    value: string;
   };
 }
 
-interface INumberCellProps extends IRowProps {
-  cell: {
-    value: number;
-  };
-}
-
-interface IStringCellProps extends IRowProps {
-  cell: { value: string };
-}
-
-interface IBoolCellProps extends IRowProps {
-  cell: { value: boolean };
-}
 interface IPlatformCellProps extends IRowProps {
   cell: {
-    value: SupportedPlatform[];
+    value: string[];
   };
 }
 
@@ -87,10 +69,7 @@ interface IDataColumn {
   Header: ((props: IHeaderProps) => JSX.Element) | string;
   Cell:
     | ((props: ICellProps) => JSX.Element)
-    | ((props: IPlatformCellProps) => JSX.Element)
-    | ((props: IStringCellProps) => JSX.Element)
-    | ((props: INumberCellProps) => JSX.Element)
-    | ((props: IBoolCellProps) => JSX.Element);
+    | ((props: IPlatformCellProps) => JSX.Element);
   id?: string;
   title?: string;
   accessor?: string;
@@ -101,14 +80,12 @@ interface IDataColumn {
 
 interface IGenerateTableHeaders {
   currentUser: IUser;
-  isInherited?: boolean;
 }
 
 // NOTE: cellProps come from react-table
 // more info here https://react-table.tanstack.com/docs/api/useTable#cell-properties
 const generateTableHeaders = ({
   currentUser,
-  isInherited = false,
 }: IGenerateTableHeaders): IDataColumn[] => {
   const isOnlyObserver = permissionsUtils.isOnlyObserver(currentUser);
 
@@ -125,7 +102,7 @@ const generateTableHeaders = ({
       Cell: (cellProps: ICellProps): JSX.Element => {
         return (
           <LinkCell
-            classes="w400 query-name-cell"
+            classes="w400"
             value={
               <>
                 <div className="query-name-text">{cellProps.cell.value}</div>
@@ -144,7 +121,7 @@ const generateTableHeaders = ({
                       type="dark"
                       effect="solid"
                       id={`observer-can-run-tooltip-${cellProps.row.original.id}`}
-                      backgroundColor={COLORS["tooltip-bg"]}
+                      backgroundColor="#3e4771"
                     >
                       Observers can run this query.
                     </ReactTooltip>
@@ -152,10 +129,7 @@ const generateTableHeaders = ({
                 )}
               </>
             }
-            path={PATHS.EDIT_QUERY(
-              cellProps.row.original.id,
-              cellProps.row.original.team_id ?? undefined
-            )}
+            path={PATHS.EDIT_QUERY(cellProps.row.original)}
           />
         );
       },
@@ -167,33 +141,34 @@ const generateTableHeaders = ({
       disableSortBy: true,
       accessor: "platforms",
       Cell: (cellProps: IPlatformCellProps): JSX.Element => {
-        return <PlatformCell platforms={cellProps.row.original.platforms} />;
+        return <PlatformCell value={cellProps.cell.value} />;
       },
     },
     {
-      title: "Frequency",
-      Header: "Frequency",
-      disableSortBy: true,
-      accessor: "interval",
-      Cell: (cellProps: INumberCellProps): JSX.Element => {
-        const val = cellProps.cell.value
-          ? `Every ${secondsToDhms(cellProps.cell.value)}`
-          : undefined;
+      title: "Author",
+      Header: (cellProps) => (
+        <HeaderCell
+          value={cellProps.column.title}
+          isSortedDesc={cellProps.column.isSortedDesc}
+        />
+      ),
+      accessor: "author_name",
+      Cell: (cellProps: ICellProps): JSX.Element => {
+        const { author_name, author_email } = cellProps.row.original;
+        const author = author_name === currentUser.name ? "You" : author_name;
         return (
-          <TextCell
-            value={val}
-            emptyCellTooltipText={
-              <>
-                Assign a frequency and turn <strong>automations</strong> on to
-                collect data at an interval.
-              </>
-            }
-          />
+          <span>
+            <Avatar
+              user={addGravatarUrlToResource({ email: author_email })}
+              size="xsmall"
+            />
+            <span className="text-cell author-name">{author}</span>
+          </span>
         );
       },
+      sortType: "caseInsensitive",
     },
     {
-      title: "Performance impact",
       Header: () => {
         return (
           <div>
@@ -211,7 +186,7 @@ const generateTableHeaders = ({
       },
       disableSortBy: true,
       accessor: "performance",
-      Cell: (cellProps: IStringCellProps) => (
+      Cell: (cellProps: ICellProps) => (
         <PillCell
           value={{
             indicator: cellProps.cell.value,
@@ -219,20 +194,6 @@ const generateTableHeaders = ({
           }}
         />
       ),
-    },
-    {
-      title: "Automations",
-      Header: "Automations",
-      disableSortBy: true,
-      accessor: "automations_enabled",
-      Cell: (cellProps: IBoolCellProps): JSX.Element => {
-        return (
-          <QueryAutomationsStatusIndicator
-            automationsEnabled={cellProps.cell.value}
-            interval={cellProps.row.original.interval}
-          />
-        );
-      },
     },
     {
       title: "Last modified",
@@ -243,7 +204,7 @@ const generateTableHeaders = ({
         />
       ),
       accessor: "updated_at",
-      Cell: (cellProps: INumberCellProps): JSX.Element => (
+      Cell: (cellProps: ICellProps): JSX.Element => (
         <TextCell
           value={formatDistanceToNow(new Date(cellProps.cell.value), {
             includeSeconds: true,
@@ -253,21 +214,62 @@ const generateTableHeaders = ({
       ),
     },
   ];
-  if (!isOnlyObserver && !isInherited) {
+  if (!isOnlyObserver) {
     tableHeaders.splice(0, 0, {
       id: "selection",
       Header: (cellProps: IHeaderProps): JSX.Element => {
         const {
           getToggleAllRowsSelectedProps,
+          rows,
+          selectedFlatRows,
           toggleAllRowsSelected,
+          toggleRowSelected,
         } = cellProps;
         const { checked, indeterminate } = getToggleAllRowsSelectedProps();
+
+        const disableToggleAllRowsSelected = () => {
+          /* Team admin or team maintainer can only delete queries they authored
+          If team admin or team maintainer authored 0 queries, disable select all queries for deletion */
+          if (isAnyTeamMaintainerOrTeamAdmin) {
+            return (
+              rows.filter(
+                (r: IQueryRow) => r.original.author_id === currentUser.id
+              ).length === 0
+            );
+          }
+          return false;
+        };
 
         const checkboxProps = {
           value: checked,
           indeterminate,
+          disabled: disableToggleAllRowsSelected(), // Disable select all if all rows are disabled
           onChange: () => {
-            toggleAllRowsSelected();
+            if (!isAnyTeamMaintainerOrTeamAdmin) {
+              toggleAllRowsSelected();
+            } else {
+              // Team maintainers may only delete the queries that they have authored
+              // so we need to do some filtering and then modify the toggle select all
+              // behavior for the header checkbox
+              const userAuthoredQueries = rows.filter(
+                (r: IQueryRow) => r.original.author_id === currentUser.id
+              );
+              if (
+                selectedFlatRows.length &&
+                selectedFlatRows.length !== userAuthoredQueries.length
+              ) {
+                // If some but not all of the user authored queries are already selected,
+                // we toggle all of the user's unselected queries to true
+                userAuthoredQueries.forEach((r: IQueryRow) =>
+                  toggleRowSelected(r.id, true)
+                );
+              } else {
+                // Otherwise, we toggle all of the user's queries to the opposite of their current state
+                userAuthoredQueries.forEach((r: IQueryRow) =>
+                  toggleRowSelected(r.id)
+                );
+              }
+            }
           },
         };
         return <Checkbox {...checkboxProps} />;
@@ -278,9 +280,44 @@ const generateTableHeaders = ({
         const checkboxProps = {
           value: checked,
           onChange: () => row.toggleRowSelected(),
+          disabled:
+            isAnyTeamMaintainerOrTeamAdmin &&
+            row.original.author_id !== currentUser.id,
         };
-        // v4.35.0 Any team admin or maintainer now can add, edit, delete their team's queries
-        return <Checkbox {...checkboxProps} />;
+        // If the user is a team maintainer, we only enable checkboxes for queries
+        // that they authored and we include a tooltip to explain disabled checkboxes
+        return (
+          <>
+            <div
+              data-tip
+              data-for={`${"select-checkbox"}__${row.original.id}`}
+              data-tip-disable={
+                !isAnyTeamMaintainerOrTeamAdmin ||
+                row.original.author_id === currentUser.id
+              }
+              className={`${
+                !(
+                  !isAnyTeamMaintainerOrTeamAdmin ||
+                  row.original.author_id === currentUser.id
+                ) && "tooltip"
+              }`}
+            >
+              <Checkbox {...checkboxProps} />
+            </div>{" "}
+            <ReactTooltip
+              className="select-checkbox-tooltip"
+              place="bottom"
+              effect="solid"
+              backgroundColor="#3e4771"
+              id={`${"select-checkbox"}__${row.original.id}`}
+              data-html
+            >
+              <>
+                You can only delete a<br /> query if you are the author.
+              </>
+            </ReactTooltip>
+          </>
+        );
       },
       disableHidden: true,
     });
